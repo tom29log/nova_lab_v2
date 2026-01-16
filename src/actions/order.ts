@@ -1,6 +1,6 @@
 'use server';
 
-import { appendRow } from '@/lib/google-sheets';
+import { prependRow } from '@/lib/google-sheets';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export interface OrderItemInput {
@@ -281,13 +281,14 @@ export async function logOrder(orderData: OrderData & {
         }
     }
 
-    // 1. Append to 'Orders' sheet
-    await appendRow('Orders!A:E', [
+    // 1. Prepend to 'Orders' sheet (Insert at top)
+    await prependRow('Orders!A:F', [
         new Date().toISOString(),
         orderData.paymentId,
         orderData.total.toString(),
-        itemsStr || 'No Items (Log Error)', // Fallback if still empty
-        orderData.customerEmail
+        itemsStr || 'No Items (Log Error)',
+        orderData.customerEmail,
+        'FALSE' // Initial Checkbox Value (Unchecked)
     ]);
 
     // 2. Handle Points if User exists
