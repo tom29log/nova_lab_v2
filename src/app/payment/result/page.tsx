@@ -36,8 +36,9 @@ function PaymentResultContent() {
             // 2. Identify Verification ID
             // PortOne V2 API requires the UUID (txId). Falling back to paymentId only if txId is missing (though V2 should send it).
             // 2. Identify Verification ID
-            // PortOne V2 API requires the UUID (txId). Falling back to paymentId if txId is missing.
-            const idToVerify = txId || paymentId;
+            // We verify using the Merchant ID (paymentId) because we confirmed it exists in the Admin Console.
+            // UUID (txId) from mobile redirect might be mismatching or V2 API requires different handling.
+            const idToVerify = paymentId || txId;
 
             // 3. Validate presence of crucial IDs
             if (!idToVerify || !orderIdStr) {

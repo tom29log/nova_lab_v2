@@ -108,9 +108,9 @@ async function getPortOnePaymentDetails(paymentId: string) {
             // Actually, based on recent docs, V2 might use specific filter object or different path.
             // But let's try the most likely query params.
 
-            // Attempt 1: merchant_uid (most standard query param for Order IDs)
-            let searchUrl = `https://api.portone.io/payments?merchant_uid=${paymentId}`;
-            // Also try appending text-based search if supported: &text=${paymentId}
+            // Attempt 1: merchant_uid[] (V2 Standard for searching by Merchant ID)
+            // PortOne V2 API often uses `merchant_uid[]` to return a list.
+            let searchUrl = `https://api.portone.io/payments?merchant_uid[]=${paymentId}`;
 
             const searchResponse = await fetch(searchUrl, {
                 method: 'GET',
@@ -123,24 +123,22 @@ async function getPortOnePaymentDetails(paymentId: string) {
 
             if (!searchResponse.ok) {
                 const err = await searchResponse.text();
-                logDebug('Merchant ID Lookup (merchant_uid) failed', { status: searchResponse.status, body: err });
-
-                // Fallback Attempt 2: paymentId (if V2 treats it as search filter)
-                // This is less likely for search, but worth a try if 400/404
+                logDebug('Merchant ID Lookup failed', { status: searchResponse.status, body: err });
+                // If 404, we really can't find it.
             } else {
                 const searchData = await searchResponse.json();
-                // Check format
+                // Check format - V2 Response usually { data: [...] } or { payments: [...] } or just [...]
                 let foundItem = null;
                 if (searchData.data && Array.isArray(searchData.data)) foundItem = searchData.data[0];
                 else if (Array.isArray(searchData)) foundItem = searchData[0];
-                // V2 sometimes matches { payments: [...] }
-                else if (searchData.payments && Array.isArray(searchData.payments)) foundItem = searchData.payments[0];
 
                 if (foundItem) {
                     targetUuid = foundItem.id || foundItem.paymentId;
                     logDebug(`Found UUID from Merchant ID: ${targetUuid}`);
                 } else {
                     logDebug('Merchant ID lookup returned no results', searchData);
+                    // Critical: If lookup fails, maybe try V1 style just in case? Or stop.
+                    // Let's assume V2 works with merchant_uid[].
                 }
             }
         }
