@@ -140,7 +140,7 @@ export default function CartPage() {
                 orderName: items.length > 1 ? `${items[0].name}외 ${items.length - 1}건` : items[0].name,
                 totalAmount: total,
                 currency: "CURRENCY_KRW",
-                channelKey: "channel-key-a3befb38-a421-4153-8c9e-7dc176f66669", // Direct Hardcode for consistency
+                channelKey: "channel-key-08ed509c-505c-4042-9a01-a5a03eaed255", // Toss Payments Test Channel
                 payMethod: payMethod,
                 redirectUrl: `${window.location.origin}/payment/result?orderId=${dbOrderId}`,
                 // Add explicit mobile redirect (legacy/PG support) by casting to any if needed or just passing
