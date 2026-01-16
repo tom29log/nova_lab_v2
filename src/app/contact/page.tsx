@@ -1,4 +1,4 @@
-import { appendRow } from '@/lib/google-sheets';
+import { prependRow } from '@/lib/google-sheets';
 import { ShoppingBag, Send } from 'lucide-react';
 
 export default function ContactPage() {
@@ -12,7 +12,7 @@ export default function ContactPage() {
         if (!name || !email || !message) return;
 
         // Append to 'Inquiries' sheet: [Date, Name, Email, Message]
-        await appendRow('Inquiries!A:D', [
+        await prependRow('Inquiries!A:D', [
             new Date().toISOString(),
             name,
             email,
