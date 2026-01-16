@@ -154,13 +154,18 @@ function PaymentResultContent() {
                 {status === 'failed' && (
                     <>
                         <div className="text-4xl mb-4">⚠️</div>
-                        <h2 className="text-xl font-bold mb-2">결제 실패</h2>
-                        <div className="bg-red-50 p-4 rounded-lg mb-6 border border-red-100">
-                            <p className="text-red-600 font-medium text-sm break-keep">{message}</p>
-                            <p className="text-xs text-gray-400 mt-2 break-all">
-                                code: {searchParams.get('code') || 'N/A'} <br />
-                                msg: {searchParams.get('message') || 'N/A'}
-                            </p>
+                        <h2 className="text-xl font-bold mb-2">결제 실패 (DEBUG)</h2>
+                        <div className="bg-red-50 p-4 rounded-lg mb-6 border border-red-100 text-left">
+                            <p className="text-red-600 font-medium text-sm break-keep mb-2">{message}</p>
+                            <details className="mt-2 text-xs">
+                                <summary className="cursor-pointer font-bold mb-1 text-red-800">개발자용 디버그 정보 (클릭)</summary>
+                                <div className="p-2 bg-white rounded border border-red-200 mt-1">
+                                    <p className="font-semibold text-gray-500 mb-1">Received Params:</p>
+                                    <pre className="whitespace-pre-wrap break-all font-mono text-gray-700 bg-gray-50 p-2 rounded">
+                                        {JSON.stringify(Object.fromEntries(searchParams.entries()), null, 2)}
+                                    </pre>
+                                </div>
+                            </details>
                         </div>
                         <button
                             onClick={() => router.push('/cart')}
