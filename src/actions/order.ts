@@ -252,17 +252,41 @@ export async function updateOrderStatus(
     }
 }
 
+// Enhanced logOrder with fallback for missing items (e.g., mobile redirect)
 export async function logOrder(orderData: OrderData & {
     userId?: string;
     usedPoints?: number;
     earnedPoints?: number;
+    dbOrderId?: number; // Optional DB ID for fallback lookup
 }) {
+    let itemsStr = orderData.items;
+
+    // Fallback: If items string is empty/short and we have a DB Order ID, fetch from DB
+    if ((!itemsStr || itemsStr.length < 2) && orderData.dbOrderId) {
+        try {
+            const { data: order } = await supabaseAdmin
+                .from('orders')
+                .select('order_items(quantity, products(name))')
+                .eq('id', orderData.dbOrderId)
+                .single();
+
+            if (order && order.order_items) {
+                itemsStr = order.order_items
+                    .map((i: any) => `${i.products?.name} (${i.quantity})`)
+                    .join(', ');
+                console.log(`[logOrder] Fetched items from DB for Order #${orderData.dbOrderId}: ${itemsStr}`);
+            }
+        } catch (e) {
+            console.error('[logOrder] Failed to fetch items from DB fallback:', e);
+        }
+    }
+
     // 1. Append to 'Orders' sheet
     await appendRow('Orders!A:E', [
         new Date().toISOString(),
         orderData.paymentId,
         orderData.total.toString(),
-        orderData.items,
+        itemsStr || 'No Items (Log Error)', // Fallback if still empty
         orderData.customerEmail
     ]);
 

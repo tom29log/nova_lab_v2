@@ -110,7 +110,8 @@ function PaymentResultContent() {
                         total: total || payment.amount?.total || 0,
                         items: items.map(i => `${i.name} (${i.quantity})`).join(', '),
                         customerEmail: payment.customer?.email || "unknown",
-                        userId: undefined
+                        userId: undefined,
+                        dbOrderId: dbOrderId // Pass DB Order ID for fallback lookup if items are empty
                     });
                     // Only clear cart if we successfully used it
                     clearCart();
@@ -164,10 +165,6 @@ function PaymentResultContent() {
                                     <p className="font-semibold text-gray-500 mb-1">Received Params:</p>
                                     <pre className="whitespace-pre-wrap break-all font-mono text-gray-700 bg-gray-50 p-2 rounded">
                                         {JSON.stringify(Object.fromEntries(searchParams.entries()), null, 2)}
-                                    </pre>
-                                    <p className="font-semibold text-gray-500 mb-1 mt-2">Server Env Check:</p>
-                                    <pre className="whitespace-pre-wrap break-all font-mono text-gray-700 bg-gray-50 p-2 rounded">
-                                        SECRET_START: {process.env.PORTONE_API_SECRET ? process.env.PORTONE_API_SECRET.substring(0, 5) + '...' : 'UNDEFINED'}
                                     </pre>
                                 </div>
                             </details>
