@@ -158,7 +158,8 @@ async function getPortOnePaymentDetails(paymentId: string) {
         if (!response.ok) {
             const errorText = await response.text();
             logDebug('PortOne API fetch failed', { status: response.status, body: errorText, targetUuid });
-            throw new Error(`API Error ${response.status}: ${errorText}`);
+            const maskedSecret = secret ? secret.substring(0, 5) + '...' : 'NONE';
+            throw new Error(`API Error ${response.status}: ${errorText} (Secret: ${maskedSecret})`);
         }
 
         const data = await response.json();
