@@ -253,6 +253,7 @@ export async function updateOrderStatus(
 }
 
 // Enhanced logOrder with fallback for missing items (e.g., mobile redirect)
+// Enhanced logOrder with fallback for missing items (e.g., mobile redirect)
 export async function logOrder(orderData: OrderData & {
     userId?: string;
     usedPoints?: number;
@@ -260,35 +261,64 @@ export async function logOrder(orderData: OrderData & {
     dbOrderId?: number; // Optional DB ID for fallback lookup
 }) {
     let itemsStr = orderData.items;
+    let recipientName = '';
+    let recipientPhone = '';
+    let shippingAddress = '';
 
-    // Fallback: If items string is empty/short and we have a DB Order ID, fetch from DB
-    if ((!itemsStr || itemsStr.length < 2) && orderData.dbOrderId) {
+    // Fallback: Fetch missing details from DB if we have an Order ID
+    if (orderData.dbOrderId) {
         try {
             const { data: order } = await supabaseAdmin
                 .from('orders')
-                .select('order_items(quantity, products(name))')
+                .select(`
+                    recipient_name, 
+                    recipient_phone, 
+                    shipping_address, 
+                    shipping_detail_address, 
+                    shipping_zipcode,
+                    order_items(quantity, products(name))
+                `)
                 .eq('id', orderData.dbOrderId)
                 .single();
 
-            if (order && order.order_items) {
-                itemsStr = order.order_items
-                    .map((i: any) => `${i.products?.name} (${i.quantity})`)
-                    .join(', ');
-                console.log(`[logOrder] Fetched items from DB for Order #${orderData.dbOrderId}: ${itemsStr}`);
+            if (order) {
+                // 1. Recover Items if missing
+                if (!itemsStr || itemsStr.length < 2) {
+                    if (order.order_items) {
+                        itemsStr = order.order_items
+                            .map((i: any) => `${i.products?.name} (${i.quantity})`)
+                            .join(', ');
+                    }
+                }
+
+                // 2. Get Shipping Info
+                recipientName = order.recipient_name || '';
+                recipientPhone = order.recipient_phone || '';
+
+                const addr = order.shipping_address || '';
+                const detail = order.shipping_detail_address || '';
+                const zip = order.shipping_zipcode || '';
+                shippingAddress = `(${zip}) ${addr} ${detail}`.trim();
+
+                console.log(`[logOrder] Fetched details from DB for Order #${orderData.dbOrderId}: ${itemsStr}`);
             }
         } catch (e) {
-            console.error('[logOrder] Failed to fetch items from DB fallback:', e);
+            console.error('[logOrder] Failed to fetch details from DB fallback:', e);
         }
     }
 
     // 1. Prepend to 'Orders' sheet (Insert at top)
-    await prependRow('Orders!A:F', [
+    // Columns: [Date, PaymentID, Total, Items, Email, Check, Name, Phone, Address]
+    await prependRow('Orders!A:I', [
         new Date().toISOString(),
         orderData.paymentId,
         orderData.total.toString(),
         itemsStr || 'No Items (Log Error)',
         orderData.customerEmail,
-        'FALSE' // Initial Checkbox Value (Unchecked)
+        'FALSE', // Initial Checkbox Value
+        recipientName,
+        recipientPhone,
+        shippingAddress
     ]);
 
     // 2. Handle Points if User exists

@@ -36,6 +36,9 @@ export function Navbar() {
             NOVA_LAB
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            <Link href="/collections" className="hover:text-black dark:hover:text-white transition-colors">
+              COLLECTIONS
+            </Link>
             <Link href="/shop" className="hover:text-black dark:hover:text-white transition-colors">
               SHOP
             </Link>
@@ -96,6 +99,13 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="absolute top-full left-0 right-0 bg-white dark:bg-black border-b border-zinc-100 dark:border-zinc-800 md:hidden animate-in slide-in-from-top-2">
           <div className="flex flex-col p-4 gap-4 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            <Link
+              href="/collections"
+              className="p-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              COLLECTIONS
+            </Link>
             <Link
               href="/shop"
               className="p-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors"

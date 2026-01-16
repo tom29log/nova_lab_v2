@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingBag, LogOut, Users } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, LogOut, Users, Images } from 'lucide-react';
 import { useClerk } from '@clerk/nextjs';
 
 const menuItems = [

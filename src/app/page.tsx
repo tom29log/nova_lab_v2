@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, ShoppingBag } from "lucide-react";
+import { getSiteConfig } from "@/actions/site-config";
 
-export default function Home() {
+export const revalidate = 60; // Revalidate
+
+export default async function Home() {
+  const heroImage = await getSiteConfig('hero_image');
+  const bgImage = heroImage || "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2000&auto=format&fit=crop";
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-80px)]">
       {/* Hero Section */}
@@ -10,10 +16,10 @@ export default function Home() {
         {/* Luxury Background Image */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/40 z-10" /> {/* Dark Overlay for readability */}
-          {/* Placeholder for high-quality jewelry image - using Unsplash source directly for demo */}
+          {/* High-quality jewelry image */}
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105 animate-slow-zoom"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2000&auto=format&fit=crop')" }}
+            style={{ backgroundImage: `url('${bgImage}')` }}
           />
         </div>
 

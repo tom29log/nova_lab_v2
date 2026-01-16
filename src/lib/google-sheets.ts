@@ -69,3 +69,36 @@ export async function prependRow(range: string, values: string[]) {
         return { success: false, error: String(error) };
     }
 }
+
+export async function readSheet(range: string) {
+    const clientEmail = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
+    const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY?.replace(/\\n/g, '\\n');
+    const sheetId = process.env.GOOGLE_SHEETS_ID;
+
+    if (!clientEmail || !privateKey || !sheetId) {
+        console.error('Google Sheets credentials missing');
+        return [];
+    }
+
+    try {
+        const auth = new google.auth.GoogleAuth({
+            credentials: {
+                client_email: clientEmail,
+                private_key: privateKey,
+            },
+            scopes: SCOPES,
+        });
+
+        const sheets = google.sheets({ version: 'v4', auth });
+
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: range,
+        });
+
+        return response.data.values || [];
+    } catch (error) {
+        console.error('Error reading from Google Sheets:', error);
+        return [];
+    }
+}
